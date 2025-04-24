@@ -1,2 +1,2 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<h1>Мобильный помощник</h1>
+<a href="/group" class="text-red-500 text-xl p-4">Создать группу</a> 
