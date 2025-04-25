@@ -327,21 +327,15 @@
   .date-inputs {
     display: flex;
     gap: 10px;
-    margin-bottom: 25px;
-    align-items: flex-end;
+    margin-bottom: 15px;
+    align-items: center;
   }
 
   .date-input-group {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 5px;
     flex: 1;
-  }
-
-  label {
-    font-weight: bold;
-    color: #333;
-    font-size: 0.9em;
   }
 
   .date-input {
@@ -351,6 +345,40 @@
     font-size: 1em;
     width: 100%;
     box-sizing: border-box;
+  }
+
+  /* Мобильная версия - остаётся горизонтальной, но с адаптацией */
+  @media (max-width: 600px) {
+    .date-inputs {
+      flex-direction: row; /* Остаётся в строке */
+      gap: 8px;
+    }
+    
+    .date-input-group {
+      min-width: 0; /* Позволяет полям сжиматься */
+    }
+    
+    .date-input {
+      padding: 8px;
+      font-size: 0.9em;
+    }
+  }
+
+  /* Для очень маленьких экранов */
+  @media (max-width: 400px) {
+    .date-inputs {
+      flex-wrap: wrap; /* Перенос на новую строку при нехватке места */
+    }
+    
+    .date-input-group {
+      min-width: 100%; /* Каждое поле на всю ширину */
+    }
+  }
+
+  label {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9em;
   }  
 
   .days-grid {
@@ -395,7 +423,7 @@
     margin: 0 auto;
     padding: 5px;
     font-family: Arial, sans-serif;
-  } 
+  }
 
   .radio-group {
     display: flex;
@@ -412,6 +440,10 @@
     font-weight: normal;
     display: flex;
     align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-width: 50px;
+    text-align: center;
   }
 
   .radio-group label.selected {
@@ -430,7 +462,21 @@
 
   @media (max-width: 600px) {
     .radio-group {
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .radio-group label {
+      min-width: auto;
+      padding: 12px 8px;
+      font-size: 0.9em;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .radio-group {
+      grid-template-columns: 1fr;
     }
   }
 </style>
