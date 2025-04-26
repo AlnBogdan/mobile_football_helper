@@ -1,5 +1,21 @@
-<script>
+<script lang="ts">
+  import { onMount } from 'svelte';
+  
   let isLoggedIn = false;
+  let activeNavItem = 'landing'; // Значение по умолчанию
+  
+  // При загрузке страницы проверяем текущий путь
+  onMount(() => {
+    const path = window.location.pathname;
+    if (path.includes('trains')) activeNavItem = 'trains';
+    else if (path.includes('calendar')) activeNavItem = 'calendar';
+    else if (path.includes('program')) activeNavItem = 'program';
+    else activeNavItem = 'landing';
+  });
+  
+  function setActive(item: string): void {
+    activeNavItem = item;
+  }
 </script>
 
 <header class="app-header">
@@ -17,15 +33,23 @@
         </button>
       </div>
     </div>
-  </div>
-  
+  </div>  
+
   <nav class="header-nav" aria-label="Основная навигация">
     <div class="container">
       <ul class="nav-menu">
-        <li><a href="/landing" class="nav-link">Главная</a></li>
-        <li><a href="/trains" class="nav-link">Тренировки</a></li>
-        <li><a href="/calendar" class="nav-link">Календарь</a></li>
-        <li><a href="/program" class="nav-link">Программа</a></li>
+        <li class:active={activeNavItem === 'landing'}>
+          <a href="/landing" class="nav-link" on:click={() => setActive('landing')}>Главная</a>
+        </li>
+        <li class:active={activeNavItem === 'trains'}>
+          <a href="/trains" class="nav-link" on:click={() => setActive('trains')}>Тренировки</a>
+        </li>
+        <li class:active={activeNavItem === 'calendar'}>
+          <a href="/calendar" class="nav-link" on:click={() => setActive('calendar')}>Календарь</a>
+        </li>
+        <li class:active={activeNavItem === 'program'}>
+          <a href="/program" class="nav-link" on:click={() => setActive('program')}>Программа</a>
+        </li>
       </ul>
     </div>
   </nav>
@@ -143,6 +167,15 @@
   .nav-link:hover::after {
     width: 50%;
   }
+
+  .nav-menu li.active .nav-link {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .nav-menu li.active .nav-link::after {
+    width: 50% !important;
+  }
   
   /* Mobile Styles */
   @media (max-width: 768px) {
@@ -209,6 +242,13 @@
     }
     .nav-menu li:nth-child(4) .nav-link::before {
       mask-image: url('https://cdn-icons-png.flaticon.com/128/16816/16816948.png');
+    }
+    .nav-menu li.active .nav-link {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .nav-menu li.active .nav-link::before {
+      background-color: #f8f8f8; /* Более яркий цвет для активной иконки */
     }
   }
 </style>
