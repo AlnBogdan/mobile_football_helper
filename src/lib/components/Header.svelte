@@ -2,14 +2,12 @@
   import { onMount } from 'svelte';
   
   let isLoggedIn = false;
-  let activeNavItem = 'landing'; // Значение по умолчанию
-  
-  // При загрузке страницы проверяем текущий путь
+  let activeNavItem = 'landing';   
   onMount(() => {
     const path = window.location.pathname;
     if (path.includes('trains')) activeNavItem = 'trains';
     else if (path.includes('calendar')) activeNavItem = 'calendar';
-    else if (path.includes('program')) activeNavItem = 'program';
+    else if (path.includes('profile')) activeNavItem = 'profile';
     else activeNavItem = 'landing';
   });
   
@@ -42,13 +40,13 @@
           <a href="/landing" class="nav-link" on:click={() => setActive('landing')}>Главная</a>
         </li>
         <li class:active={activeNavItem === 'trains'}>
-          <a href="/trains" class="nav-link" on:click={() => setActive('trains')}>Тренировки</a>
+          <a href="/trains" class="nav-link" on:click={() => setActive('trains')}>Тренировка</a>
         </li>
         <li class:active={activeNavItem === 'calendar'}>
           <a href="/calendar" class="nav-link" on:click={() => setActive('calendar')}>Календарь</a>
         </li>
-        <li class:active={activeNavItem === 'program'}>
-          <a href="/program" class="nav-link" on:click={() => setActive('program')}>Программа</a>
+        <li class:active={activeNavItem === 'profile'}>
+          <a href="/profile" class="nav-link" on:click={() => setActive('profile')}>Профиль</a>
         </li>
       </ul>
     </div>
@@ -241,7 +239,7 @@
       mask-image: url('https://cdn-icons-png.flaticon.com/128/7691/7691413.png');
     }
     .nav-menu li:nth-child(4) .nav-link::before {
-      mask-image: url('https://cdn-icons-png.flaticon.com/128/16816/16816948.png');
+      mask-image: url('https://cdn-icons-png.flaticon.com/128/64/64572.png');
     }
     .nav-menu li.active .nav-link {
       background: rgba(255, 255, 255, 0.15);

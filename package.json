@@ -13,7 +13,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^4.0.0",
-		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/kit": "^2.20.8",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
@@ -21,6 +21,8 @@
 		"vite": "^6.2.5"
 	},
 	"dependencies": {
+		"docx": "^9.4.1",
+		"html-docx-js": "^0.3.1",
 		"pdfjs-dist": "^3.11.174"
 	}
 }
