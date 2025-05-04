@@ -10,26 +10,29 @@
         title: string;
         disabled?: boolean;
     }
+    interface Option {
+        id: string;
+        name: string;
+        title: string;
+        disabled?: boolean;
+    }
 
     type Step1Data = {
         title: string;
         options: Option[];
-    };
-
+    };   
     type Step2Data = {
         [key: string]: {
             options: Option[];
             stepTitle: string;
         };
-    };
-
+    };    
     type Step3Data = {
         [key: string]: {
             options: Option[];
             stepTitle: string;
         };
-    };
-
+    };    
     const step1Data: Step1Data = {
         title: "Выберите этап подготовки",
         options: [
@@ -47,8 +50,7 @@
                 disabled: true,
             },
         ],
-    };
-
+    };    
     const step2Data: Step2Data = {
         "0": {
             stepTitle: "Выберите этап начальной подготовки",
@@ -199,13 +201,11 @@
     function selectOption(step: 1 | 2 | 3, optionId: string) {
         selectedOptions[step] = optionId;
     }
-
     function nextStep() {
         if (currentStep < 3 && selectedOptions[currentStep] !== null) {
             currentStep += 1 as 1 | 2 | 3;
         }
-    }
-
+    }    
     function prevStep() {
         if (currentStep > 1) {
             if (currentStep === 2) {
