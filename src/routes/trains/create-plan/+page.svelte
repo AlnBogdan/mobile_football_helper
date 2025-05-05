@@ -642,8 +642,8 @@
 
 <style>
     :root {
-        --primary-color: #3498db;
-        --primary-color-dark: #217dbb;
+        --primary-color: #3b82f6;
+        --primary-color-dark: #2563eb;
         --secondary-color: #2c3e50;
         --border-color: #e2e8f0;
         --shadow-color: rgba(0, 0, 0, 0.1);
@@ -653,7 +653,7 @@
         --transition-speed: 0.2s;
         --base-padding: 0.75rem;
         --small-padding: 0.5rem;
-        --error-color: #e74c3c;
+        --error-color: #e74c3c;        
     }
 
     :global(body) {
