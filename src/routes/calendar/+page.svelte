@@ -56,7 +56,7 @@
   @media (max-width: 600px) {
     .message-block {
       padding: 1.2rem 1rem;
-      max-width: 85vw;
+      max-width: 90vw;
     }
     h1 {
       font-size: 1.1rem;

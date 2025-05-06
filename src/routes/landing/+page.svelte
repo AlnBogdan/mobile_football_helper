@@ -160,11 +160,11 @@
   /* Адаптивность для мобильных */
   @media (max-width: 600px) {
     .program-container {
-      padding: 1rem 0.2rem;
+      padding: 1.2rem 1rem;
     }
     .download-card {
       padding: 1.2rem 0.7rem;
-      max-width: 96vw;
+      max-width: 90vw;
       gap: 1rem;
     }
     .program-title {
