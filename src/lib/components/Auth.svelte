@@ -1,21 +1,23 @@
 <!-- src/lib/components/AuthForm.svelte -->
 <script lang="ts">
   import { supabase } from "$lib/supabaseClient";
-  import { createEventDispatcher } from 'svelte';
+  import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
 
-  const dispatch = createEventDispatcher();
-  
   export let authMode: "login" | "signup" | "forgot" = "login";
-  export let onSuccess: () => void = () => {};
-  
+
   let email = "";
   let password = "";
   let authError = "";
   let isLoading = false;
+  let successMessage = "";
 
-  async function handleAuth() {
+  async function handleSubmit(event: Event) {
+    event.preventDefault(); // Используем стандартное предотвращение поведения формы
+
     isLoading = true;
     authError = "";
+    successMessage = "";
 
     try {
       if (authMode === "login") {
@@ -24,18 +26,27 @@
           password,
         });
         if (error) throw error;
-        onSuccess();
-        dispatch('authSuccess');
+
+        //const redirectTo = $page.url.searchParams.get('redirectTo') || '/admin';
+        //goto(redirectTo);
       } else if (authMode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            data: { role: "user" },
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
+
         if (error) throw error;
-        authError = "Проверьте вашу почту для подтверждения регистрации";
+
+        if (data?.user?.identities?.length === 0) {
+          authError = "Пользователь с таким email уже существует";
+          return;
+        }
+
+        successMessage = "Проверьте вашу почту для подтверждения регистрации";
         authMode = "login";
       }
     } catch (error) {
@@ -45,16 +56,19 @@
     }
   }
 
-  async function handlePasswordReset() {
+  async function handlePasswordReset(event: Event) {
+    event.preventDefault(); // Используем стандартное предотвращение поведения формы
+
     isLoading = true;
     authError = "";
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: `${window.location.origin}/auth/update-password`,
       });
+
       if (error) throw error;
-      authError = "Инструкции по сбросу пароля отправлены на вашу почту";
+      successMessage = "Инструкции по сбросу пароля отправлены на вашу почту";
     } catch (error) {
       authError = error instanceof Error ? error.message : "Неизвестная ошибка";
     } finally {
@@ -65,198 +79,242 @@
   function switchMode(mode: "login" | "signup" | "forgot") {
     authMode = mode;
     authError = "";
+    successMessage = "";
   }
 </script>
 
 <div class="auth-container">
-<h2>
-  {#if authMode === "login"}Вход в аккаунт
-  {:else if authMode === "signup"}Регистрация
-  {:else}Восстановление пароля{/if}
-</h2>
+  <h2>
+    {#if authMode === "login"}Вход в систему
+    {:else if authMode === "signup"}Регистрация
+    {:else}Восстановление пароля{/if}
+  </h2>
 
-{#if authError}
-  <div class="auth-error">{authError}</div>
-{/if}
+  {#if authError}
+    <div class="auth-error">{authError}</div>
+  {/if}
 
-{#if authMode !== "forgot"}
-  <input
-    type="email"
-    bind:value={email}
-    placeholder="Email"
-    disabled={isLoading}
-  />
-  <input
-    type="password"
-    bind:value={password}
-    placeholder="Пароль"
-    disabled={isLoading}
-  />
+  {#if successMessage}
+    <div class="success-message">{successMessage}</div>
+  {/if}
 
-  <button on:click={handleAuth} disabled={isLoading}>
-    {#if isLoading}
-      <span class="spinner"></span>
-    {:else if authMode === "login"}Войти
-    {:else}Зарегистрироваться{/if}
-  </button>
+  <form
+    on:submit|preventDefault={authMode === "forgot"
+      ? handlePasswordReset
+      : handleSubmit}
+  >
+    <input
+      type="email"
+      bind:value={email}
+      placeholder="Email"
+      disabled={isLoading}
+      required
+    />
+
+    {#if authMode !== "forgot"}
+      <input
+        type="password"
+        bind:value={password}
+        placeholder="Пароль"
+        disabled={isLoading}
+        required
+        minlength="6"
+      />
+    {/if}
+
+    <button type="submit" disabled={isLoading}>
+      {#if isLoading}
+        <span class="spinner"></span>
+      {:else if authMode === "login"}
+        Войти
+      {:else if authMode === "signup"}
+        Зарегистрироваться
+      {:else}
+        Отправить инструкции
+      {/if}
+    </button>
+  </form>
 
   <div class="auth-links">
     {#if authMode === "login"}
-      <button type="button" class="text-button" on:click={() => switchMode("signup")}>
+      <button
+        type="button"
+        class="text-button"
+        on:click={() => switchMode("signup")}
+      >
         Нет аккаунта? Зарегистрируйтесь
       </button>
-      <button type="button" class="text-button" on:click={() => switchMode("forgot")}>
+      <button
+        type="button"
+        class="text-button"
+        on:click={() => switchMode("forgot")}
+      >
         Забыли пароль?
       </button>
-    {:else}
-      <button type="button" class="text-button" on:click={() => switchMode("login")}>
+    {:else if authMode === "signup"}
+      <button
+        type="button"
+        class="text-button"
+        on:click={() => switchMode("login")}
+      >
         Уже есть аккаунт? Войдите
+      </button>
+    {:else}
+      <button
+        type="button"
+        class="text-button"
+        on:click={() => switchMode("login")}
+      >
+        Вернуться ко входу
       </button>
     {/if}
   </div>
-{:else}
-  <input
-    type="email"
-    bind:value={email}
-    placeholder="Email"
-    disabled={isLoading}
-  />
-
-  <button on:click={handlePasswordReset} disabled={isLoading}>
-    {#if isLoading}
-      <span class="spinner"></span>
-    {:else}
-      Отправить инструкции
-    {/if}
-  </button>
-
-  <div class="auth-links">
-    <button type="button" class="text-button" on:click={() => switchMode("login")}>
-      Вернуться ко входу
-    </button>
-  </div>
-{/if}
 </div>
 
 <style>
-.auth-container {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.auth-container h2 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  font-size: 1.5rem;
-  color: #2c3e50;
-}
-
-.auth-container input {
-  display: block;
-  width: 100%;
-  padding: 12px 15px;
-  margin: 0 0 1rem 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-.auth-container button:not(.text-button) {
-  width: 100%;
-  padding: 12px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
-  margin-top: 10px;
-  box-sizing: border-box;
-  transition: background 0.2s;
-}
-
-.auth-container button:not(.text-button):hover:not(:disabled) {
-  background: #2563eb;
-}
-
-.auth-error {
-  color: #e74c3c;
-  margin-bottom: 1rem;
-  padding: 10px 12px;
-  background: #fdecea;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  word-break: break-word;
-}
-
-.auth-links {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  text-align: center;
-}
-
-.text-button {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  cursor: pointer;
-  text-decoration: underline;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  border-radius: 4px;
-  width: auto;
-  margin: 0 auto;
-  transition: all 0.2s ease;
-}
-
-.text-button:hover {
-  background: rgba(59, 130, 246, 0.1);
-  text-decoration: none;
-  color: #2563eb;
-}
-
-.text-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-}
-
-.spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 400px) {      
   .auth-container {
-    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 0 auto;
+    font-family: inherit;
   }
-  
-  .auth-container h2 {
-    font-size: 1.3rem;
+
+  /* Гарантируем одинаковое поведение размеров для всех элементов */
+  .auth-container,
+  .auth-container * {
+    box-sizing: border-box;
   }
-  
-  .auth-container input,
-  .auth-container button:not(.text-button) {
-    padding: 10px 12px;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--text-dark, #222);
   }
-}
+
+  form {
+    width: 100%;
+  }
+
+  /* Все поля формы и кнопка одной ширины */
+  input,
+  button[type="submit"] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 4px;
+  }
+
+  /* Стили для инпутов */
+  input {
+    border: 1px solid var(--border-color, #e5e7eb);
+    margin-bottom: 1rem;
+    background: #fafafa;
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--primary-color, #3b82f6);
+    background: #fff;
+  }
+
+  /* Кнопка отправки */
+  button[type="submit"] {
+    background: var(--primary-color, #3b82f6);
+    color: #fff;
+    border: none;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  button[type="submit"]:hover:not(:disabled) {
+    background: var(--primary-dark, #2563eb);
+  }
+
+  button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* Сообщения об ошибке и успехе */
+  .auth-error {
+    color: var(--error-color, #b91c1c);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: #fee2e2;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+
+  .success-message {
+    color: var(--success-color, #059669);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background: #d1fae5;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+
+  /* Ссылки под формой */
+  .auth-links {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .text-button {
+    background: none;
+    border: none;
+    color: var(--primary-color, #3b82f6);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.97rem;
+    padding: 0.25rem;
+    transition: color 0.2s;
+  }
+
+  .text-button:hover {
+    text-decoration: none;
+    color: var(--primary-dark, #2563eb);
+  }
+
+  /* Спиннер загрузки */
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Адаптивность для мобильных */
+  @media (max-width: 500px) {
+    .auth-container {
+      padding: 1rem;
+      max-width: 98vw;
+    }
+    input,
+    button[type="submit"] {
+      font-size: 1rem;
+      padding: 0.6rem;
+    }
+  }
 </style>

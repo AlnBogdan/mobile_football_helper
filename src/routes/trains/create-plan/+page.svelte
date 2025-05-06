@@ -2,6 +2,8 @@
     import Header from "$lib/components/Header.svelte";
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
+    import { supabase } from "$lib/supabaseClient";
+    import { onMount } from "svelte";
 
     interface Exercise {
         id: number;
@@ -13,10 +15,32 @@
         videoLink?: string;
     }
 
-    interface ExercisesDatabase {
-        [key: string]: Exercise[];
-    }
+    async function getExercisesForCurrentParams(): Promise<Exercise[]> {
+        const { data, error } = await supabase
+            .from('exercises')
+            .select('*')
+            .eq('stage', trainingData.stage)
+            .eq('age_group', trainingData.age)
+            .eq('block', trainingData.block)
+            .order('part')
+            .order('id');
 
+        if (error) {
+            console.error('Error fetching exercises:', error);
+            return [];
+        }
+
+        return data.map(ex => ({
+            id: ex.id,
+            name: ex.name,
+            description: ex.description,
+            scheme: ex.scheme_url,
+            duration: ex.duration,
+            part: ex.part as "preparatory" | "main" | "final",
+            videoLink: ex.video_link
+        }));
+    }
+    
     const equipmentOptions = [
         "Мячи",
         "Манишки",
@@ -27,59 +51,7 @@
         "Ворота",
         "Маркеры",
         "Свисток",
-    ];
-
-    const exercisesDatabase: ExercisesDatabase = {
-        "0_0_0": [
-            {
-                id: 1,
-                name: "Подвижная игра «Кто быстрее»",
-                description:
-                    "Основная задача подготовить игроков к основной части занятия. Поднять эмоциональный фон Игроки делятся на 2 команды по 6 человек и выполняют ведение мяча в своём квадрате, заполняя пустые зоны квадрата. По сигналу тренера (поднятая фишка) игроки должны как можно быстрее перебежать в другой квадрат. Синяя фишка – перебегам с мячом. Красная фишка – без мяча. Просим игроков видеть поле и уходить от столкновений.",
-                scheme: "/images/1.png",
-                duration: 10,
-                part: "preparatory",
-                videoLink: "https://youtu.be/example1",
-            },
-            {
-                id: 2,
-                name: "Ведение мяча",
-                description:
-                    "Игроки выполняют ведение в шаге. - упражнение выполняется без сопротивления.",
-                scheme: "/images/2.jpg",
-                duration: 15,
-                part: "main",
-                videoLink: "https://youtu.be/example2",
-            },
-            {
-                id: 3,
-                name: "Игра 1в1",
-                description:
-                    "Атакующий игрок находится в правом верхнем углу и бежит в прямоугольник через центральную фишку. Задача атакующего завести мяч за лицевую линию соперника. Игрок обороны располагается в левом нижнем углу и начинают бежать в отбор вместе с атакующим игроком. Задача защитника отобрать мяч и завести его за линию атакующего.",
-                scheme: "/images/3.jpg",
-                duration: 15,
-                part: "main",
-                videoLink: "https://youtu.be/example3",
-            },
-            {
-                id: 4,
-                name: "Игра в футбол 3x3",
-                description:
-                    "Обучить ведению мяча внешней частью подъёма - Игроки делятся на 4 команды по 3 человека. Играют на 2 площадках 3x3 на 4 ворот. Возможны различные варианты заданий на завершение. Игра с двумя лигами, очки считаются только в одной лиге, побеждает команда, которая наберет больше очков. - на площадке 1 у игрока не менее 3 касаний - на площадке 2 задача игрока завести мяч в зону",
-                scheme: "/images/4.jpg",
-                duration: 15,
-                part: "main",
-            },
-            {
-                id: 5,
-                name: "Подведение итогов занятия, сбор инвентаря.",
-                description: "Подведение итогов занятия, сбор инвентаря.",
-                scheme: "",
-                duration: 4,
-                part: "final",
-            },
-        ],
-    };
+    ];    
 
     let trainingData = {
         date: "",
@@ -100,15 +72,7 @@
     let selectedExercise: Exercise | null = null;
     let showModal = false;
 
-    $: currentExercises = getExercisesForCurrentParams();
-
-    function getExercisesForCurrentParams(): Exercise[] {
-        const key =
-            `${trainingData.stage}_${trainingData.age}_${trainingData.block}`
-                .toLowerCase()
-                .replace(/ /g, "_");
-        return exercisesDatabase[key] || [];
-    }
+    let currentExercises: Exercise[] = [];  
 
     function goBackToStep3() {
         const params = new URLSearchParams();
@@ -117,20 +81,7 @@
         params.set("step", "3");
         params.set("selectedBlock", trainingData.block);
         goto(`/trains?${params.toString()}`);
-    }
-
-    function addExercise(exercise: Exercise) {
-        trainingData.selectedExercises = [
-            ...trainingData.selectedExercises,
-            exercise,
-        ];
-    }
-
-    function removeExercise(id: number) {
-        trainingData.selectedExercises = trainingData.selectedExercises.filter(
-            (ex) => ex.id !== id,
-        );
-    }
+    }    
 
     function openExerciseModal(exercise: Exercise) {
         selectedExercise = exercise;
@@ -292,6 +243,9 @@
             URL.revokeObjectURL(blobUrl);
         });
     }
+    onMount(async () => {
+        currentExercises = await getExercisesForCurrentParams();
+    });
 </script>
 
 <Header />

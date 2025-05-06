@@ -36,17 +36,17 @@
     const step1Data: Step1Data = {
         title: "Выберите этап подготовки",
         options: [
-            { id: "0", name: "5-9 лет", title: "Начальная подготовка" },
+            { id: "0", name: "5-9 ЛЕТ", title: "Этап начальной подготовки (ОФП Ф, НП-1, НП-2, НП-3)" },
             {
                 id: "1",
-                name: "10-14 лет",
-                title: "Учебно-тренировочный этап",
+                name: "10-14 ЛЕТ",
+                title: "Этап учебно-тренировочный (УТ-1, УТ-2, УТ-3, УТ-4, УТ-5)",
                 disabled: true,
             },
             {
                 id: "2",
-                name: "15-17 лет",
-                title: "Спортивное совершенствование",
+                name: "15-17 ЛЕТ",
+                title: "Этап начальной подготовки (СПС-1, СПС-2, СПС-3)",
                 disabled: true,
             },
         ],
@@ -326,12 +326,12 @@
     .content-background {
         flex: 1;
         background-color: var(--bg-light);
-        padding: 20px;
     }
 
     .form-container {
         max-width: 900px;
         margin: 0 auto;
+        margin-top: 2rem;
         padding: 1.5rem;
         background: var(--bg-white);
         box-shadow: 0 2px 10px var(--shadow-color);

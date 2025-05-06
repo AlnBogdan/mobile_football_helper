@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import AuthForm from "$lib/components/Auth.svelte";
+  import AuthForm from "$lib/components/Auth.svelte";  
 
   let isLoggedIn = false;
   let activeNavItem = "landing";
@@ -16,13 +16,14 @@
     else if (path.includes("profile")) activeNavItem = "profile";
     else activeNavItem = "landing";
 
-    // Проверка состояния аутентификации
+    // Подписка на изменения состояния аутентификации
     supabase.auth.onAuthStateChange((event, session) => {
       isLoggedIn = !!session?.user;
       userEmail = session?.user?.email || "";
+      if (isLoggedIn) showAuthModal = false; // Закрываем модальное окно при успешной авторизации
     });
 
-    // Проверить текущую сессию
+    // Первоначальная проверка сессии
     checkSession();
   });
 
@@ -38,6 +39,12 @@
 
   async function handleLogout() {
     await supabase.auth.signOut();
+  }
+
+  // Обработчик успешной авторизации
+  function handleAuthSuccess() {
+    showAuthModal = false; // Закрываем модальное окно
+    checkSession(); // Обновляем состояние авторизации
   }
 </script>
 
@@ -68,7 +75,7 @@
     </div>
   </div>
 
-  <nav class="header-nav" aria-label="Основная навигация">
+  <nav class="header-nav" aria-label="Основная навигация">    
     <div class="container">
       <ul class="nav-menu">
         <li class:active={activeNavItem === "landing"}>
@@ -102,14 +109,8 @@
     <div class="auth-content">
       <button on:click={() => showAuthModal = false}>×</button>
       <AuthForm 
-        onSuccess={() => {
-          showAuthModal = false;
-          // Можно добавить здесь дополнительную логику обновления
-        }}
-        on:authSuccess={() => {
-          showAuthModal = false;
-          // Можно вызвать здесь checkSession() если нужно
-        }}
+        authMode="login"
+        on:authSuccess={handleAuthSuccess}
       />
     </div>
   </div>

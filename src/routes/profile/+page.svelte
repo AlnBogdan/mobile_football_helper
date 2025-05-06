@@ -4,16 +4,18 @@
   import AuthForm from "$lib/components/Auth.svelte";
   import Header from "$lib/components/Header.svelte";
 
-
   let isLoggedIn = false;
   let userEmail = "";
   let userData: any = null;
-  let isLoading = true; // Добавляем состояние загрузки
+  let isLoading = true;
 
   async function checkSession() {
     isLoading = true;
-    const { data: { session }, error } = await supabase.auth.getSession();
-    
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
     if (error) {
       console.error("Error getting session:", error);
       isLoading = false;
@@ -22,14 +24,14 @@
 
     isLoggedIn = !!session?.user;
     userEmail = session?.user?.email || "";
-    
+
     if (isLoggedIn && session?.user) {
       const { data, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
         .single();
-      
+
       if (!profileError) {
         userData = data;
       }
@@ -39,8 +41,7 @@
 
   onMount(async () => {
     await checkSession();
-    
-    // Подписываемся на изменения состояния аутентификации
+
     supabase.auth.onAuthStateChange((event, session) => {
       checkSession();
     });
@@ -50,7 +51,13 @@
     const { error } = await supabase.auth.signOut();
     if (error) console.error("Logout error:", error);
   }
+
+  // Обработчик успешной аутентификации
+  function handleAuthSuccess() {
+    checkSession();
+  }
 </script>
+
 <Header />
 
 <main class="page-content">
@@ -64,20 +71,21 @@
           <span class="info-label">Email:</span>
           <span class="info-value">{userEmail}</span>
         </div>
-        {#if userData?.full_name}
+        <div class="info-item">
+          <span class="info-label">Имя:</span>
+          <span class="info-value">{userData.name}</span>
+        </div>
+        {#if userData?.role}
           <div class="info-item">
-            <span class="info-label">Имя:</span>
-            <span class="info-value">{userData.full_name}</span>
+            <span class="info-label">Роль:</span>
+            <span class="info-value">{userData.role}</span>
           </div>
         {/if}
       </div>
       <button on:click={handleLogout} class="logout-btn">Выйти</button>
     </div>
   {:else}
-    <AuthForm 
-      onSuccess={checkSession}
-      on:authSuccess={checkSession}
-    />
+    <AuthForm authMode="login" on:authSuccess={handleAuthSuccess} />
   {/if}
 </main>
 
@@ -95,21 +103,21 @@
     border-radius: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
-  
+
   /* Остальные стили без изменений */
   .profile-info {
     margin: 2rem 0;
   }
-  
+
   .info-item {
     margin-bottom: 1rem;
   }
-  
+
   .info-label {
     font-weight: bold;
     margin-right: 0.5rem;
   }
-  
+
   .logout-btn {
     background: #ef4444;
     color: white;
@@ -118,7 +126,7 @@
     border-radius: 4px;
     cursor: pointer;
   }
-  
+
   .loading {
     text-align: center;
     padding: 2rem;
