@@ -14,7 +14,7 @@
   
   <style>
     main {
-      max-width: 1200px;
+      max-width: 400px;
       margin: 0 auto;
       padding: 1rem;
     }

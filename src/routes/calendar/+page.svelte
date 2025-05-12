@@ -15,7 +15,7 @@
 
 <style>
   .container {
-    margin-top: 2rem;
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;

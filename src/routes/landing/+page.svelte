@@ -44,7 +44,7 @@
 
 <style>
   .program-container {
-    margin-top: 2rem;
+    margin-top: 0.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;

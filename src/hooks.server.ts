@@ -1,36 +1,20 @@
 // src/hooks.server.ts
-import { supabase } from '$lib/supabaseClient';
-import type { Handle } from '@sveltejs/kit';
-import type { AppUser } from '$lib/types';
+import { supabase } from '$lib/supabaseClient'
+import type { Handle } from '@sveltejs/kit'
+import type { Session, User } from '@supabase/supabase-js'
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // Инициализация Supabase в locals
-  event.locals.supabase = supabase;
+  event.locals.getSession = async (): Promise<Session | null> => {
+    const { data: { session } } = await supabase.auth.getSession()
+    return session
+  }
 
-  // Получение сессии
-  event.locals.getSession = async () => {
-    const { data: { session } } = await event.locals.supabase.auth.getSession();
-    return session;
-  };
+  event.locals.getUser = async (): Promise<User | null> => {
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  }
 
-  // Получение пользователя с ролью
-  event.locals.getUser = async (): Promise<AppUser | null> => {
-    const session = await event.locals.getSession();
-    if (!session) return null;
+  event.locals.session = await event.locals.getSession()
 
-    const { data: profile } = await event.locals.supabase
-      .from('profiles')
-      .select('username, role')
-      .eq('id', session.user.id)
-      .single();
-
-    return {
-      id: session.user.id,
-      email: session.user.email,
-      role: profile?.role || 'user',
-      username: profile?.username
-    };
-  };
-
-  return resolve(event);
-};
+  return resolve(event)
+}

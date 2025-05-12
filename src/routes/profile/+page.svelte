@@ -80,8 +80,11 @@
             <span class="info-label">Роль:</span>
             <span class="info-value">{userData.role}</span>
           </div>
+          {#if userData?.role === 'admin'}
+          <a href="/admin" class="admin-link">Админ панель</a>
+          {/if}
         {/if}
-      </div>
+      </div>      
       <button on:click={handleLogout} class="logout-btn">Выйти</button>
     </div>
   {:else}
@@ -91,7 +94,7 @@
 
 <style>
   .page-content {
-    margin-top: 2rem; /* Основной отступ от хедера */
+    margin-top: 0.5rem; /* Основной отступ от хедера */
     padding: 0 1rem; /* Боковые отступы для мобильных */
   }
 

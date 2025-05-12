@@ -60,7 +60,7 @@
             height="36"
           />
         </a>
-        <span class="logo-text">Мобильный помощник тренера</span>
+        <span class="logo-text">BlockBYFootball</span>
       </div>
       <div class="header-actions">
         {#if isLoggedIn}

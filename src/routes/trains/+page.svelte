@@ -20,23 +20,27 @@
     type Step1Data = {
         title: string;
         options: Option[];
-    };   
+    };
     type Step2Data = {
         [key: string]: {
             options: Option[];
             stepTitle: string;
         };
-    };    
+    };
     type Step3Data = {
         [key: string]: {
             options: Option[];
             stepTitle: string;
         };
-    };    
+    };
     const step1Data: Step1Data = {
         title: "Выберите этап подготовки",
         options: [
-            { id: "0", name: "5-9 ЛЕТ", title: "Этап начальной подготовки (ОФП Ф, НП-1, НП-2, НП-3)" },
+            {
+                id: "0",
+                name: "5-9 ЛЕТ",
+                title: "Этап начальной подготовки (ОФП Ф, НП-1, НП-2, НП-3)",
+            },
             {
                 id: "1",
                 name: "10-14 ЛЕТ",
@@ -50,19 +54,19 @@
                 disabled: true,
             },
         ],
-    };    
+    };
     const step2Data: Step2Data = {
         "0": {
             stepTitle: "Выберите этап начальной подготовки",
             options: [
                 {
                     id: "0",
-                    name: "5-6 лет",
+                    name: "ОФПФ (5-6 лет)",
                     title: "Общая физическая подготовка с элементами футбола",
                 },
-                { id: "1", name: "6-7 лет", title: "Начальная подготовка 1" },
-                { id: "2", name: "7-8 лет", title: "Начальная подготовка 2" },
-                { id: "3", name: "8-9 лет", title: "Начальная подготовка 3" },
+                { id: "1", name: "НП-1 (6-7 лет)", title: "Начальная подготовка 1-го года обучения" },
+                { id: "2", name: "НП-2 (7-8 лет)", title: "Начальная подготовка 2-го года обучения" },
+                { id: "3", name: "НП-3 (8-9 лет)", title: "Начальная подготовка 3-го года обчучения" },
             ],
         },
     };
@@ -205,7 +209,7 @@
         if (currentStep < 3 && selectedOptions[currentStep] !== null) {
             currentStep += 1 as 1 | 2 | 3;
         }
-    }    
+    }
     function prevStep() {
         if (currentStep > 1) {
             if (currentStep === 2) {
@@ -331,7 +335,7 @@
     .form-container {
         max-width: 900px;
         margin: 0 auto;
-        margin-top: 2rem;
+        margin-top: 0.5rem;
         padding: 1.5rem;
         background: var(--bg-white);
         box-shadow: 0 2px 10px var(--shadow-color);

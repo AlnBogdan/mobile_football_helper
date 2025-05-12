@@ -1,25 +1,28 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 /// <reference types="@sveltejs/kit" />
+// src/app.d.ts
+import { SupabaseClient, Session, User } from '@supabase/supabase-js'
+import { Database } from './supabase.types'
 
-import { SupabaseClient, Session } from '@supabase/supabase-js';
-import type { AppUser } from '$lib/types';
 declare global {
-	namespace App {
-		interface Locals {
-		  supabase: SupabaseClient;
-		  getSession: () => Promise<Session | null>;
-		  getUser: () => Promise<AppUser | null>;
-		}
-		interface PageData {
-		  session?: Session | null;
-		  user?: AppUser | null;
-		}
-		// interface Error {}
-		// interface Platform {}
-	  }
+  namespace App {
+    interface Locals {
+      supabase: SupabaseClient<Database>
+      getSession: () => Promise<Session | null>
+      getUser: () => Promise<User | null>
+      session: Session | null
+    }
+    interface PageData {
+      session: Session | null
+    }
+  }
 }
 
-
-
-export {};
+export interface Profile {
+  id: string
+  email: string
+  name: string
+  role: string
+  created_at: string
+}
