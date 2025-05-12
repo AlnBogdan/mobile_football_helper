@@ -13,13 +13,7 @@
       молодежного футбола в структуре клубов по футболу, средних школ – училищ
       олимпийского резерва в Республике Беларусь:
     </p>
-    <div class="download-section">
-      <svg class="pdf-icon" viewBox="0 0 24 24">
-        <path
-          fill="currentColor"
-          d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z M8,12V18H10V12H8Z M12,12V18H14V12H12Z M16,12V18H18V12H16Z"
-        />
-      </svg>
+    <div class="download-section">      
       <div class="download-info">
         <h3 class="document-title">УЧЕБНАЯ ПРОГРАММА ПО ФУТБОЛУ</h3>
         <p class="document-meta">PDF документ • 2.4 MB</p>
@@ -96,13 +90,6 @@
     width: 100%;
   }
 
-  .pdf-icon {
-    width: 48px;
-    height: 48px;
-    color: var(--primary-color, #3b82f6);
-    flex-shrink: 0;
-  }
-
   .download-info {
     flex: 1 1 auto;
     min-width: 0;
@@ -160,37 +147,75 @@
   /* Адаптивность для мобильных */
   @media (max-width: 600px) {
     .program-container {
-      padding: 1.2rem 1rem;
+      padding: 1.5rem;
+      margin-top: 0;
     }
+    
     .download-card {
-      padding: 1.2rem 0.7rem;
-      max-width: 90vw;
-      gap: 1rem;
+      padding: 1.5rem 1rem;
+      max-width: 100%;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e5e7eb;
     }
+    
     .program-title {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
     }
+    
     .program-description {
-      font-size: 0.97rem;
-      max-width: 98vw;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
     }
+    
     .download-section {
       flex-direction: column;
-      align-items: stretch;
-      gap: 0.8rem;
+      gap: 1rem;
     }
-    .pdf-icon {
-      margin: 0 auto 0.5rem auto;
-    }
-    .document-title,
-    .document-meta {
+    
+    .download-info {
       text-align: center;
-    }
-    .download-button {
-      justify-content: center;
       width: 100%;
-      font-size: 0.97rem;
-      padding: 0.7em 0;
+    }
+    
+    .document-title {
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .document-meta {
+      font-size: 0.9rem;
+    }
+    
+    .download-button {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      justify-content: center;
+      border-radius: 0.4rem;
+    }
+    
+    .download-icon {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* Для очень маленьких экранов */
+  @media (max-width: 400px) {
+    .program-title {
+      font-size: 1.2rem;
+    }
+    
+    .program-description {
+      font-size: 0.92rem;
+    }
+    
+    .download-button {
+      padding: 0.7rem;
+      font-size: 0.95rem;
     }
   }
 </style>
