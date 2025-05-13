@@ -1,0 +1,21 @@
+{
+  "name": "BlockBYFootball",
+  "short_name": "BlockBYFootball",
+  "description": "Описание моего веб-приложения",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/static/icons/icon_50.png",
+      "sizes": "50x50",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon_100.png",
+      "sizes": "100x100",
+      "type": "image/png"
+    }
+  ]
+}

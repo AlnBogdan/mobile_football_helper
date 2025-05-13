@@ -17,30 +17,30 @@
 
     async function getExercisesForCurrentParams(): Promise<Exercise[]> {
         const { data, error } = await supabase
-            .from('exercises')
-            .select('*')
-            .eq('stage', trainingData.stage)
-            .eq('age_group', trainingData.age)
-            .eq('block', trainingData.block)
-            .order('part')
-            .order('id');
+            .from("exercises")
+            .select("*")
+            .eq("stage", trainingData.stage)
+            .eq("age_group", trainingData.age)
+            .eq("block", trainingData.block)
+            .order("part")
+            .order("id");
 
         if (error) {
-            console.error('Error fetching exercises:', error);
+            console.error("Error fetching exercises:", error);
             return [];
         }
 
-        return data.map(ex => ({
+        return data.map((ex) => ({
             id: ex.id,
             name: ex.name,
             description: ex.description,
             scheme: ex.scheme_url,
             duration: ex.duration,
             part: ex.part as "preparatory" | "main" | "final",
-            videoLink: ex.video_link
+            videoLink: ex.video_link,
         }));
     }
-    
+
     const equipmentOptions = [
         "Мячи",
         "Манишки",
@@ -51,7 +51,7 @@
         "Ворота",
         "Маркеры",
         "Свисток",
-    ];    
+    ];
 
     let trainingData = {
         date: "",
@@ -72,7 +72,60 @@
     let selectedExercise: Exercise | null = null;
     let showModal = false;
 
-    let currentExercises: Exercise[] = [];  
+    let currentExercises: Exercise[] = [];
+
+    // Добавляем функции для работы с выбором упражнений
+    function toggleExercise(exercise: Exercise, part: string) {
+        const currentSelected = trainingData.selectedExercises.filter(
+            (e) => e.part === part,
+        );
+
+        // Проверяем ограничения по количеству
+        if (
+            part === "preparatory" &&
+            currentSelected.length >= 1 &&
+            !trainingData.selectedExercises.some((e) => e.id === exercise.id)
+        ) {
+            return; // Нельзя выбрать больше 1 в подготовительной части
+        }
+        if (
+            part === "main" &&
+            currentSelected.length >= 3 &&
+            !trainingData.selectedExercises.some((e) => e.id === exercise.id)
+        ) {
+            return; // Нельзя выбрать больше 3 в основной части
+        }
+        if (
+            part === "final" &&
+            currentSelected.length >= 1 &&
+            !trainingData.selectedExercises.some((e) => e.id === exercise.id)
+        ) {
+            return; // Нельзя выбрать больше 1 в заключительной части
+        }
+
+        if (trainingData.selectedExercises.some((e) => e.id === exercise.id)) {
+            // Удаляем если уже выбрано
+            trainingData.selectedExercises =
+                trainingData.selectedExercises.filter(
+                    (e) => e.id !== exercise.id,
+                );
+        } else {
+            // Добавляем если не выбрано
+            trainingData.selectedExercises = [
+                ...trainingData.selectedExercises,
+                exercise,
+            ];
+        }
+    }
+
+    function isExerciseSelected(exercise: Exercise) {
+        return trainingData.selectedExercises.some((e) => e.id === exercise.id);
+    }
+
+    function getSelectedCount(part: string) {
+        return trainingData.selectedExercises.filter((e) => e.part === part)
+            .length;
+    }
 
     function goBackToStep3() {
         const params = new URLSearchParams();
@@ -81,7 +134,7 @@
         params.set("step", "3");
         params.set("selectedBlock", trainingData.block);
         goto(`/trains?${params.toString()}`);
-    }    
+    }
 
     function openExerciseModal(exercise: Exercise) {
         selectedExercise = exercise;
@@ -134,8 +187,10 @@
                 ],
             });
 
+       const exercisesToExport = trainingData.selectedExercises; // Всегда только выбранные упражнения
+
         const exercisesToTable = (title: string, part: string) => {
-            const filtered = currentExercises.filter((e) => e.part === part);
+            const filtered = exercisesToExport.filter((e) => e.part === part);
             if (filtered.length === 0) return [];
 
             const rows = filtered.map(
@@ -250,289 +305,362 @@
 
 <Header />
 <div class="container">
-<div class="form-container">
-    <div class="form-header">
-        <button
-            class="back-button"
-            on:click={goBackToStep3}
-            aria-label="Назад к выбору блока"
-        >
-            <svg
-                width="18"
-                height="18"
-                fill="none"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
+    <div class="form-container">
+        <div class="form-header">
+            <button
+                class="back-button"
+                on:click={goBackToStep3}
+                aria-label="Назад к выбору блока"
             >
-                <path
-                    d="M15 18l-6-6 6-6"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                />
-            </svg>
-            Назад
-        </button>
-        <h2>План-конспект учебно-тренировочного занятия</h2>
-    </div>
-
-    <div class="selected-params">
-        <div class="param-row">
-            <div class="param-item">
-                <span class="param-label">Этап подготовки:</span>
-                <span class="param-value badge">{trainingData.stage}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Возрастная группа:</span>
-                <span class="param-value badge">{trainingData.age}</span>
-            </div>
-            <div class="param-item">
-                <span class="param-label">Блок обучения:</span>
-                <span class="param-value badge">{trainingData.block}</span>
-            </div>
-        </div>
-    </div>
-
-    <form on:submit|preventDefault={submitTrainingPlan}>
-        <div class="form-section">
-            <h3>Основные данные</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="date">Дата проведения</label>
-                    <input
-                        id="date"
-                        type="date"
-                        bind:value={trainingData.date}
-                        required
-                        placeholder="Выберите дату"
-                        aria-required="true"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="time">Время</label>
-                    <input
-                        id="time"
-                        type="time"
-                        bind:value={trainingData.time}
-                        required
-                        placeholder="Выберите время"
-                        aria-required="true"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="duration">Длительность (мин)</label>
-                    <input
-                        id="duration"
-                        type="number"
-                        bind:value={trainingData.duration}
-                        min="30"
-                        required
-                        placeholder="Минуты"
-                        aria-required="true"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="location">Место</label>
-                    <input
-                        id="location"
-                        type="text"
-                        bind:value={trainingData.location}
-                        required
-                        placeholder="Например, спортзал №2"
-                        aria-required="true"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="participantsCount">Количество человек</label>
-                    <input
-                        id="participantsCount"
-                        type="number"
-                        bind:value={trainingData.participantsCount}
-                        min="1"
-                        required
-                        placeholder="Число участников"
-                        aria-required="true"
-                    />
-                </div>
-                <div class="form-group">
-                    <label for="coach">Тренер</label>
-                    <input
-                        id="coach"
-                        type="text"
-                        bind:value={trainingData.coach}
-                        required
-                        placeholder="ФИО тренера"
-                        aria-required="true"
-                    />
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <h3>Содержание занятия</h3>
-            <div class="form-group">
-                <label for="objectives">Цели и задачи</label>
-                <textarea
-                    id="objectives"
-                    bind:value={trainingData.objectives}
-                    rows="3"
-                    required
-                    placeholder="Опишите цели и задачи занятия"
-                    aria-required="true"
-                ></textarea>
-            </div>
-            <div class="form-group">
-                <!-- svelte-ignore a11y_label_has_associated_control -->
-                <label>Необходимый инвентарь</label>
-                <div
-                    class="checkbox-list"
-                    role="group"
-                    aria-labelledby="equipment-label"
+                <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
                 >
-                    {#each equipmentOptions as item}
-                        <label class="checkbox-item">
-                            <input
-                                type="checkbox"
-                                value={item}
-                                bind:group={trainingData.equipment}
-                                aria-label={item}
-                            />
-                            {item}
-                        </label>
-                    {/each}
+                    <path
+                        d="M15 18l-6-6 6-6"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+                Назад
+            </button>
+            <h2>План-конспект учебно-тренировочного занятия</h2>
+        </div>
+
+        <div class="selected-params">
+            <div class="param-row">
+                <div class="param-item">
+                    <span class="param-label">Этап подготовки:</span>
+                    <span class="param-value badge">{trainingData.stage}</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-label">Возрастная группа:</span>
+                    <span class="param-value badge">{trainingData.age}</span>
+                </div>
+                <div class="param-item">
+                    <span class="param-label">Блок обучения:</span>
+                    <span class="param-value badge">{trainingData.block}</span>
                 </div>
             </div>
         </div>
 
-        <!-- Подготовительная часть -->
-        <div class="part-section">
-            <h4 id="preparatory-heading">Подготовительная часть</h4>
-            <ul class="exercises-grid" aria-labelledby="preparatory-heading">
-                {#each currentExercises.filter((e) => e.part === "preparatory") as exercise (exercise.id)}
-                    <li>
-                        <button
-                            type="button"
-                            class="exercise-card"
-                            on:click={() => openExerciseModal(exercise)}
-                            on:keydown={(e) =>
-                                ["Enter", "Space"].includes(e.key) &&
-                                openExerciseModal(exercise)}
-                            aria-label={`Подробнее об упражнении: ${exercise.name}`}
+        <form on:submit|preventDefault={submitTrainingPlan}>
+            <div class="form-section">
+                <h3>Основные данные</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="date">Дата проведения</label>
+                        <input
+                            id="date"
+                            type="date"
+                            bind:value={trainingData.date}
+                            required
+                            placeholder="Выберите дату"
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Время</label>
+                        <input
+                            id="time"
+                            type="time"
+                            bind:value={trainingData.time}
+                            required
+                            placeholder="Выберите время"
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Длительность (мин)</label>
+                        <input
+                            id="duration"
+                            type="number"
+                            bind:value={trainingData.duration}
+                            min="30"
+                            required
+                            placeholder="Минуты"
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Место</label>
+                        <input
+                            id="location"
+                            type="text"
+                            bind:value={trainingData.location}
+                            required
+                            placeholder="Например, спортзал №2"
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="participantsCount">Количество человек</label
                         >
-                            <div class="exercise-scheme">
-                                {#if exercise.scheme}
-                                    <img
-                                        src={exercise.scheme}
-                                        alt=""
-                                        role="presentation"
-                                    />
-                                {:else}
-                                    <div class="scheme-placeholder">
-                                        Нет изображения
-                                    </div>
-                                {/if}
-                            </div>
-                            <div class="exercise-info">
-                                <h5>{exercise.name}</h5>
-                                <p>{exercise.description}</p>
-                                <div class="exercise-duration">
-                                    {exercise.duration} мин
-                                </div>
-                            </div>
-                        </button>
-                    </li>
-                {/each}
-            </ul>
-        </div>
+                        <input
+                            id="participantsCount"
+                            type="number"
+                            bind:value={trainingData.participantsCount}
+                            min="1"
+                            required
+                            placeholder="Число участников"
+                            aria-required="true"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="coach">Тренер</label>
+                        <input
+                            id="coach"
+                            type="text"
+                            bind:value={trainingData.coach}
+                            required
+                            placeholder="ФИО тренера"
+                            aria-required="true"
+                        />
+                    </div>
+                </div>
+            </div>
 
-        <!-- Основная часть -->
-        <div class="part-section">
-            <h4 id="main-heading">Основная часть</h4>
-            <ul class="exercises-grid" aria-labelledby="main-heading">
-                {#each currentExercises.filter((e) => e.part === "main") as exercise (exercise.id)}
-                    <li>
-                        <button
-                            type="button"
-                            class="exercise-card"
-                            on:click={() => openExerciseModal(exercise)}
-                            on:keydown={(e) =>
-                                ["Enter", "Space"].includes(e.key) &&
-                                openExerciseModal(exercise)}
-                            aria-label={`Подробнее об упражнении: ${exercise.name}`}
-                        >
-                            <div class="exercise-scheme">
-                                {#if exercise.scheme}
-                                    <img
-                                        src={exercise.scheme}
-                                        alt=""
-                                        role="presentation"
-                                    />
-                                {:else}
-                                    <div class="scheme-placeholder">
-                                        Нет изображения
-                                    </div>
-                                {/if}
-                            </div>
-                            <div class="exercise-info">
-                                <h5>{exercise.name}</h5>
-                                <p>{exercise.description}</p>
-                                <div class="exercise-duration">
-                                    {exercise.duration} мин
-                                </div>
-                            </div>
-                        </button>
-                    </li>
-                {/each}
-            </ul>
-        </div>
+            <div class="form-section">
+                <h3>Содержание занятия</h3>
+                <div class="form-group">
+                    <label for="objectives">Цели и задачи</label>
+                    <textarea
+                        id="objectives"
+                        bind:value={trainingData.objectives}
+                        rows="3"
+                        required
+                        placeholder="Опишите цели и задачи занятия"
+                        aria-required="true"
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <!-- svelte-ignore a11y_label_has_associated_control -->
+                    <label>Необходимый инвентарь</label>
+                    <div
+                        class="checkbox-list"
+                        role="group"
+                        aria-labelledby="equipment-label"
+                    >
+                        {#each equipmentOptions as item}
+                            <label class="checkbox-item">
+                                <input
+                                    type="checkbox"
+                                    value={item}
+                                    bind:group={trainingData.equipment}
+                                    aria-label={item}
+                                />
+                                {item}
+                            </label>
+                        {/each}
+                    </div>
+                </div>
+            </div>
 
-        <!-- Заключительная часть -->
-        <div class="part-section">
-            <h4 id="final-heading">Заключительная часть</h4>
-            <ul class="exercises-grid" aria-labelledby="final-heading">
-                {#each currentExercises.filter((e) => e.part === "final") as exercise (exercise.id)}
-                    <li>
-                        <button
-                            type="button"
-                            class="exercise-card"
-                            on:click={() => openExerciseModal(exercise)}
-                            on:keydown={(e) =>
-                                ["Enter", "Space"].includes(e.key) &&
-                                openExerciseModal(exercise)}
-                            aria-label={`Подробнее об упражнении: ${exercise.name}`}
-                        >
-                            <div class="exercise-scheme">
-                                {#if exercise.scheme}
-                                    <img
-                                        src={exercise.scheme}
-                                        alt=""
-                                        role="presentation"
+            <!-- Подготовительная часть -->
+            <div class="part-section">
+                <h4 id="preparatory-heading">Подготовительная часть (выбрано: {getSelectedCount("preparatory",)}/1)</h4>
+                <ul class="exercises-grid" aria-labelledby="preparatory-heading">
+                    {#each currentExercises.filter((e) => e.part === "preparatory") as exercise (exercise.id)}
+                        <li>
+                            <div class="exercise-card-container">
+                                <!-- Чекбокс для выбора -->
+                                <label class="exercise-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={isExerciseSelected(exercise)}
+                                        on:change={() =>
+                                            toggleExercise(
+                                                exercise,
+                                                "preparatory",
+                                            )}
+                                        class="exercise-checkbox"
+                                        aria-label="Выбрать упражнение"
+                                        disabled={getSelectedCount(
+                                            "preparatory",
+                                        ) >= 1 && !isExerciseSelected(exercise)}
                                     />
-                                {:else}
-                                    <div class="scheme-placeholder">
-                                        Нет изображения
+                                    <span class="checkmark"></span>
+                                </label>
+
+                                <!-- Карточка для просмотра деталей -->
+                                <button
+                                    type="button"
+                                    class="exercise-card {isExerciseSelected(
+                                        exercise,
+                                    )
+                                        ? 'selected'
+                                        : ''}"
+                                    on:click={() => openExerciseModal(exercise)}
+                                    on:keydown={(e) =>
+                                        ["Enter", "Space"].includes(e.key) &&
+                                        openExerciseModal(exercise)}
+                                    aria-label={`Подробнее об упражнении: ${exercise.name}`}
+                                >
+                                    <div class="exercise-scheme">
+                                        {#if exercise.scheme}
+                                            <img
+                                                src={exercise.scheme}
+                                                alt=""
+                                                role="presentation"
+                                            />
+                                        {:else}
+                                            <div class="scheme-placeholder">
+                                                Нет изображения
+                                            </div>
+                                        {/if}
                                     </div>
-                                {/if}
+                                    <div class="exercise-info">
+                                        <h5>{exercise.name}</h5>
+                                        <p>{exercise.description}</p>
+                                        <div class="exercise-duration">
+                                            {exercise.duration} мин
+                                        </div>
+                                    </div>
+                                </button>
                             </div>
-                            <div class="exercise-info">
-                                <h5>{exercise.name}</h5>
-                                <p>{exercise.description}</p>
-                                <div class="exercise-duration">
-                                    {exercise.duration} мин
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+
+            <!-- Основная часть -->
+            <div class="part-section">
+                <h4 id="main-heading">
+                    Основная часть (выбрано: {getSelectedCount("main")}/3)
+                </h4>
+                <ul class="exercises-grid" aria-labelledby="main-heading">
+                    {#each currentExercises.filter((e) => e.part === "main") as exercise (exercise.id)}
+                        <li>
+                            <div class="exercise-card-container">
+                                <!-- Чекбокс для выбора -->
+                                <label class="exercise-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={isExerciseSelected(exercise)}
+                                        on:change={() =>
+                                            toggleExercise(
+                                                exercise,
+                                                "main",
+                                            )}
+                                        class="exercise-checkbox"
+                                        aria-label="Выбрать упражнение"
+                                        disabled={getSelectedCount(
+                                            "main",
+                                        ) >= 3 && !isExerciseSelected(exercise)}
+                                    />
+                                    <span class="checkmark"></span>
+                                </label>
+                            <button
+                                type="button"
+                                class="exercise-card"
+                                on:click={() => openExerciseModal(exercise)}
+                                on:keydown={(e) =>
+                                    ["Enter", "Space"].includes(e.key) &&
+                                    openExerciseModal(exercise)}
+                                aria-label={`Подробнее об упражнении: ${exercise.name}`}
+                            >
+                                <div class="exercise-scheme">
+                                    {#if exercise.scheme}
+                                        <img
+                                            src={exercise.scheme}
+                                            alt=""
+                                            role="presentation"
+                                        />
+                                    {:else}
+                                        <div class="scheme-placeholder">
+                                            Нет изображения
+                                        </div>
+                                    {/if}
                                 </div>
-                            </div>
-                        </button>
-                    </li>
-                {/each}
-            </ul>
-        </div>
-        <div class="submit-wrapper">
-            <button type="submit" class="submit-button"> Сохранить </button>
-        </div>
-    </form>
-</div>
+                                <div class="exercise-info">
+                                    <h5>{exercise.name}</h5>
+                                    <p>{exercise.description}</p>
+                                    <div class="exercise-duration">
+                                        {exercise.duration} мин
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+
+            <!-- Заключительная часть -->
+            <div class="part-section">
+                <h4 id="final-heading">Заключительная часть</h4>
+                <ul class="exercises-grid" aria-labelledby="final-heading">
+                    {#each currentExercises.filter((e) => e.part === "final") as exercise (exercise.id)}
+                        <li>
+                            <div class="exercise-card-container">
+                                <!-- Чекбокс для выбора -->
+                                <label class="exercise-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={isExerciseSelected(exercise)}
+                                        on:change={() =>
+                                            toggleExercise(
+                                                exercise,
+                                                "final",
+                                            )}
+                                        class="exercise-checkbox"
+                                        aria-label="Выбрать упражнение"
+                                        disabled={getSelectedCount(
+                                            "final",
+                                        ) >= 1 && !isExerciseSelected(exercise)}
+                                    />
+                                    <span class="checkmark"></span>
+                                </label>
+                            <button
+                                type="button"
+                                class="exercise-card"
+                                on:click={() => openExerciseModal(exercise)}
+                                on:keydown={(e) =>
+                                    ["Enter", "Space"].includes(e.key) &&
+                                    openExerciseModal(exercise)}
+                                aria-label={`Подробнее об упражнении: ${exercise.name}`}
+                            >
+                                <div class="exercise-scheme">
+                                    {#if exercise.scheme}
+                                        <img
+                                            src={exercise.scheme}
+                                            alt=""
+                                            role="presentation"
+                                        />
+                                    {:else}
+                                        <div class="scheme-placeholder">
+                                            Нет изображения
+                                        </div>
+                                    {/if}
+                                </div>
+                                <div class="exercise-info">
+                                    <h5>{exercise.name}</h5>
+                                    <p>{exercise.description}</p>
+                                    <div class="exercise-duration">
+                                        {exercise.duration} мин
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+            <div class="submit-wrapper">
+                <button 
+        type="submit" 
+        class="submit-button"
+        disabled={trainingData.selectedExercises.length === 0}
+    >
+        Сохранить план-конспект
+    </button>    
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Модальное окно с деталями упражнения -->
@@ -595,7 +723,7 @@
     </div>
 {/if}
 
-<style>  
+<style>
     .form-container {
         max-width: 900px;
         margin: 0.5rem auto;
@@ -739,7 +867,7 @@
     .form-grid {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 1.1rem;
+        gap: 2rem;
         margin: 0.5rem 0;
         padding: 0 0.5rem;
     }
@@ -837,11 +965,10 @@
         border-bottom: 1px solid var(--border-color);
     }
 
-    /* Стили для карточек упражнений */
     .exercises-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1.5rem;
+        gap: 0.3rem;
         margin: 1rem 0;
         padding: 0;
         list-style: none;
@@ -860,11 +987,79 @@
         background: white;
         text-align: left;
         width: 100%;
-        height: 100%;
         display: flex;
         flex-direction: column;
         margin: 0;
         font: inherit;
+        height: 280px;
+        position: relative;
+    }
+
+    .exercise-card.selected {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px var(--primary-color);
+    }
+
+    .exercise-card-container {
+        position: relative;
+        height: 100%;
+    }
+
+    .exercise-checkbox-label {
+        position: absolute;
+        top: 0.5rem;
+        right: 2rem;
+        z-index: 2;
+        cursor: pointer;
+    }
+
+    .exercise-checkbox {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 1.2rem;
+        width: 1.2rem;
+        background-color: white;
+        border: 2px solid var(--primary-color);
+        border-radius: 0.25rem;
+    }
+
+    .exercise-checkbox:checked ~ .checkmark {
+        background-color: var(--primary-color);
+    }
+
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+
+    .exercise-checkbox:checked ~ .checkmark:after {
+        display: block;
+    }
+
+    .checkmark:after {
+        left: 0.35rem;
+        top: 0.1rem;
+        width: 0.3rem;
+        height: 0.6rem;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .exercise-checkbox:disabled ~ .checkmark {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: var(--text-light);
     }
 
     .exercise-card:hover,
@@ -880,7 +1075,7 @@
     }
 
     .exercise-scheme {
-        height: 180px;
+        height: 120px;
         overflow: hidden;
     }
 
@@ -901,7 +1096,7 @@
     }
 
     .exercise-info {
-        padding: 1rem;
+        padding: 0.8rem;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -918,16 +1113,25 @@
         font-size: 0.9rem;
         color: var(--text-light);
         flex-grow: 1;
+        /* Обновленные свойства для ограничения текста */
+        display: -webkit-box;
+        line-clamp: 3; /* ограничиваем тремя строками */
+        -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
+        line-height: 1.4; /* для лучшего отображения */
+        max-height: 4.2em; /* 3 строки * 1.4 line-height */
     }
 
     .exercise-duration {
         font-size: 0.9rem;
         color: var(--primary-color);
         font-weight: 600;
+    }
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #cbd5e0;
     }
 
     /* Стили для модального окна */
@@ -955,6 +1159,13 @@
         overflow-y: auto;
         position: relative;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-content p {
+        white-space: normal;
+        line-clamp: unset;
+        max-height: none;
+        overflow: visible;
     }
 
     .modal-close {
@@ -1026,12 +1237,22 @@
         padding: 0.5rem 0;
     }
 
+    button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .submit-button {
-        background: linear-gradient(
-            90deg,
-            var(--primary-color) 0%,
-            var(--primary-hover) 100%
-        );
+        background: var(--primary-color);
         color: white;
         border: none;
         padding: 0.7rem 1.2rem;
@@ -1040,10 +1261,6 @@
         cursor: pointer;
         width: 100%;
         display: block;
-        transition:
-            background 0.2s,
-            box-shadow 0.2s,
-            transform 0.2s;
         user-select: none;
     }
 
@@ -1052,18 +1269,6 @@
             width: auto;
             min-width: 220px;
         }
-    }
-
-    .submit-button:hover,
-    .submit-button:focus {
-        background: linear-gradient(
-            90deg,
-            var(--primary-hover) 0%,
-            var(--primary-color) 100%
-        );
-        box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
-        transform: translateY(-2px) scale(1.03);
-        outline: none;
     }
 
     @media (prefers-color-scheme: dark) {
