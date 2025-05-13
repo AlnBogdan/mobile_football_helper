@@ -54,13 +54,21 @@
   }
 
   @media (max-width: 600px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      padding-bottom: 80px;
+    }
+    
     .message-block {
       padding: 1.2rem 1rem;
-      max-width: 90vw;
+      max-width: 100%;
     }
+    
     h1 {
       font-size: 1.1rem;
     }
+    
     p {
       font-size: 0.95rem;
     }
