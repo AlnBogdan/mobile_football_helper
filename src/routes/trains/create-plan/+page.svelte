@@ -249,7 +249,7 @@
 </script>
 
 <Header />
-
+<div class="container">
 <div class="form-container">
     <div class="form-header">
         <button
@@ -533,6 +533,7 @@
         </div>
     </form>
 </div>
+</div>
 
 <!-- Модальное окно с деталями упражнения -->
 {#if showModal && selectedExercise}
@@ -594,33 +595,7 @@
     </div>
 {/if}
 
-<style>
-    :root {
-        --primary-color: #3b82f6;
-        --primary-color-dark: #2563eb;
-        --secondary-color: #2c3e50;
-        --border-color: #e2e8f0;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --background-light: #f8fafc;
-        --text-light: #64748b;
-        --text-dark: #2c3e50;
-        --transition-speed: 0.2s;
-        --base-padding: 0.75rem;
-        --small-padding: 0.5rem;
-        --error-color: #e74c3c;        
-    }
-
-    :global(body) {
-        background-color: #f5f7fa;
-        margin: 0;
-        padding: 0;
-        font-family: "Segoe UI", system-ui, sans-serif;
-        line-height: 1.4;
-        transition:
-            background-color 0.3s,
-            color 0.3s;
-    }
-
+<style>  
     .form-container {
         max-width: 900px;
         margin: 0.5rem auto;
@@ -632,8 +607,6 @@
             background-color 0.3s,
             color 0.3s;
         border-radius: 0.5rem;
-        padding-bottom: 80px; /* Добавьте этот отступ */
-        margin-bottom: 20px; /* И этот */
     }
 
     .form-container:hover {
@@ -1038,7 +1011,7 @@
     }
 
     .video-link:hover {
-        background: var(--primary-color-dark);
+        background: var(--primary-hover);
     }
 
     .no-video {
@@ -1057,7 +1030,7 @@
         background: linear-gradient(
             90deg,
             var(--primary-color) 0%,
-            var(--primary-color-dark) 100%
+            var(--primary-hover) 100%
         );
         color: white;
         border: none;
@@ -1085,7 +1058,7 @@
     .submit-button:focus {
         background: linear-gradient(
             90deg,
-            var(--primary-color-dark) 0%,
+            var(--primary-hover) 0%,
             var(--primary-color) 100%
         );
         box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);

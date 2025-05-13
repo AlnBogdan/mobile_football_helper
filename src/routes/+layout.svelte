@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import type { Session } from '@supabase/supabase-js';
+  import "../styles/global.css";
   
   // Вариант 1: Если data действительно не используется в компоненте
   export const data: { session: Session | null } = $page.data;

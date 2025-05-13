@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { supabase } from "$lib/supabaseClient";
-  import AuthForm from "$lib/components/Auth.svelte";  
+  import AuthForm from "$lib/components/Auth.svelte";
 
   let isLoggedIn = false;
   let activeNavItem = "landing";
@@ -28,14 +28,16 @@
   });
 
   async function checkSession() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     isLoggedIn = !!session?.user;
     userEmail = session?.user?.email || "";
   }
 
   function setActive(item: string): void {
     activeNavItem = item;
-  }    
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -50,7 +52,7 @@
 
 <header class="app-header">
   <div class="header-top">
-    <div class="container">
+    <div class="container-header">
       <div class="header-logo">
         <a href="/" aria-label="Логотип Помощник">
           <img
@@ -75,26 +77,42 @@
     </div>
   </div>
 
-  <nav class="header-nav" aria-label="Основная навигация">    
-    <div class="container">
+  <nav class="header-nav" aria-label="Основная навигация">
+    <div class="container-header">
       <ul class="nav-menu">
         <li class:active={activeNavItem === "landing"}>
-          <a href="/landing" class="nav-link" on:click={() => setActive("landing")}>
+          <a
+            href="/landing"
+            class="nav-link"
+            on:click={() => setActive("landing")}
+          >
             Главная
           </a>
         </li>
         <li class:active={activeNavItem === "trains"}>
-          <a href="/trains" class="nav-link" on:click={() => setActive("trains")}>
+          <a
+            href="/trains"
+            class="nav-link"
+            on:click={() => setActive("trains")}
+          >
             Тренировка
           </a>
         </li>
         <li class:active={activeNavItem === "calendar"}>
-          <a href="/calendar" class="nav-link" on:click={() => setActive("calendar")}>
+          <a
+            href="/calendar"
+            class="nav-link"
+            on:click={() => setActive("calendar")}
+          >
             Календарь
           </a>
         </li>
         <li class:active={activeNavItem === "profile"}>
-          <a href="/profile" class="nav-link" on:click={() => setActive("profile")}>
+          <a
+            href="/profile"
+            class="nav-link"
+            on:click={() => setActive("profile")}
+          >
             Профиль
           </a>
         </li>
@@ -107,51 +125,31 @@
 {#if showAuthModal}
   <div class="auth-modal show">
     <div class="auth-content">
-      <button on:click={() => showAuthModal = false}>×</button>
-      <AuthForm 
-        authMode="login"
-        on:authSuccess={handleAuthSuccess}
-      />
+      <button on:click={() => (showAuthModal = false)}>×</button>
+      <AuthForm authMode="login" on:authSuccess={handleAuthSuccess} />
     </div>
   </div>
 {/if}
 
 <style>
-  :root {
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
-    --text-white: #ffffff;
-    --bg-white: #ffffff;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --error-color: #e74c3c;
-    --error-bg: #fdecea;
-    --border-radius: 8px;
-    --zindex-modal: 2000;
-    --zindex-header: 1000;
+  :global(body) {
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+    transition:
+      background-color 0.3s,
+      color 0.3s;
   }
-
-    :global(body) {
-        background-color: #f5f7fa;
-        margin: 0;
-        padding: 0;
-        font-family: "Segoe UI", system-ui, sans-serif;
-        line-height: 1.4;
-        transition:
-            background-color 0.3s,
-            color 0.3s;
-    }
-  
 
   /* Основные стили шапки */
   .app-header {
-    font-family: "Segoe UI", system-ui, sans-serif;
     box-shadow: var(--shadow);
     position: relative;
     z-index: var(--zindex-header);
   }
 
-  .container {
+  .container-header {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
@@ -164,7 +162,7 @@
     border-bottom: 1px solid #e6e6e6;
   }
 
-  .header-top .container {
+  .header-top .container-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -190,8 +188,7 @@
 
   .btn-login {
     padding: 8px 16px;
-    border-radius: var(--border-radius);
-    font-weight: 600;
+    border-radius: var(--border-radius);    
     cursor: pointer;
     background: var(--primary-color);
     color: var(--text-white);
@@ -352,7 +349,9 @@
     box-sizing: border-box;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
   }
 
   .auth-modal.show {
@@ -406,7 +405,7 @@
     .auth-content {
       padding: 1.2rem;
     }
-    
+
     .auth-content > button {
       top: 10px;
       right: 10px;

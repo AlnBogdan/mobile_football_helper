@@ -14,15 +14,6 @@
 </main>
 
 <style>
-  .container {
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--base-padding);
-    background: var(--background-light);
-  }
-
   .message-block {
     background: #fff;
     border-radius: 0.5rem;
@@ -53,13 +44,7 @@
     margin: 0;
   }
 
-  @media (max-width: 600px) {
-    .container {
-      padding-left: 1rem;
-      padding-right: 1rem;
-      padding-bottom: 80px;
-    }
-    
+  @media (max-width: 600px) {   
     .message-block {
       padding: 1.2rem 1rem;
       max-width: 100%;

@@ -233,7 +233,7 @@
 <div class="page-wrapper">
     <Header />
 
-    <div class="content-background">
+    <div class="container">
         <div class="form-container">
             <h2>Шаг {currentStep} из 3</h2>
             <h3>{currentStepTitle}</h3>
@@ -311,31 +311,11 @@
     </div>
 </div>
 
-<style>
-    :root {
-        --bg-light: #f5f7fa;
-        --bg-white: #ffffff;
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --primary-color: #3b82f6;
-        --text-dark: #1e293b;
-        --border-color: #e2e8f0;
-    }
-
-    .page-wrapper {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .content-background {
-        flex: 1;
-        background-color: var(--bg-light);
-    }
-
+<style> 
+    
     .form-container {
         max-width: 900px;
         margin: 0 auto;
-        margin-top: 0.5rem;
         padding: 1.5rem;
         background: var(--bg-white);
         box-shadow: 0 2px 10px var(--shadow-color);
@@ -435,9 +415,7 @@
         cursor: not-allowed;
     }
 
-    .back-button {
-        /* position: absolute; убрано */
-        left: 0; /* можно тоже убрать */
+    .back-button {       
         background: #f0f0f0;
         border: none;
         color: var(--primary-color);
@@ -475,55 +453,5 @@
     .next-button:hover:not(:disabled),
     .submit-button:hover:not(:disabled) {
         background: #2563eb;
-    }
-
-    @media (max-width: 768px) {
-        .content-background {
-            padding: 15px;
-        }
-
-        .options-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .form-container {
-            padding: 1rem;
-        }
-    }
-
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --bg-light: #1e293b;
-            --bg-white: #334155;
-            --text-dark: #f8fafc;
-            --border-color: #475569;
-        }
-
-        .option {
-            background: #475569;
-            border-color: var(--border-color);
-        }
-
-        .option:hover:not(.disabled) {
-            background: #4b5563;
-        }
-
-        .option.disabled {
-            background: #475569;
-        }
-
-        .option-title,
-        .coming-soon {
-            color: #94a3b8;
-        }
-
-        .back-button {
-            background: #475569;
-            color: #e2e8f0;
-        }
-
-        .back-button:hover:not(:disabled) {
-            background: #4b5563;
-        }
-    }
+    }    
 </style>

@@ -4,7 +4,7 @@
 
 <Header />
 
-<main class="program-container">
+<main class="container">
   <div class="download-card">
     <h1 class="program-title">Программа тренировок</h1>
     <p class="program-description">
@@ -37,16 +37,6 @@
 </main>
 
 <style>
-  .program-container {
-    margin-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 60vh;
-    padding: var(--base-padding);
-    background: var(--background-light, #f8fafc);
-  }
-
   .download-card {
     background: #fff;
     border-radius: 0.5rem;
@@ -68,7 +58,7 @@
 
   .program-title {
     font-size: 1.5rem;
-    color: var(--primary-color-dark, #1d4ed8);
+    color: var(--primary-color-dark);
     font-weight: 700;
     margin: 0.5rem 0 1rem 0;
     text-align: center;
@@ -146,11 +136,7 @@
 
   /* Адаптивность для мобильных */
   @media (max-width: 600px) {
-    .program-container {
-      padding: 1.5rem;
-      margin-top: 0;
-    }
-    
+        
     .download-card {
       padding: 1.5rem 1rem;
       max-width: 100%;

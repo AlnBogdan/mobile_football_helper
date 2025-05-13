@@ -60,7 +60,7 @@
 
 <Header />
 
-<main class="page-content">
+<main class="container">
   {#if isLoading}
     <div class="loading">Загрузка...</div>
   {:else if isLoggedIn}
@@ -92,22 +92,16 @@
   {/if}
 </main>
 
-<style>
-  .page-content {
-    margin-top: 0.5rem; /* Основной отступ от хедера */
-    padding: 0 1rem; /* Боковые отступы для мобильных */
-  }
-
+<style> 
   .profile-container {
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 1.5rem;
     background: white;
     border-radius: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
-
-  /* Остальные стили без изменений */
+  
   .profile-info {
     margin: 2rem 0;
   }
@@ -133,13 +127,5 @@
   .loading {
     text-align: center;
     padding: 2rem;
-  }
-
-  /* Адаптивные отступы */
-  @media (max-width: 768px) {
-    .page-content {
-      margin-top: 1.5rem;
-      padding: 0 0.5rem;
-    }
-  }
+  }  
 </style>
