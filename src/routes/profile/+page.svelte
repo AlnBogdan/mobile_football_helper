@@ -11,10 +11,7 @@
 
   async function checkSession() {
     isLoading = true;
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
+    const {data: { session },error,} = await supabase.auth.getSession();
 
     if (error) {
       console.error("Error getting session:", error);
@@ -23,7 +20,7 @@
     }
 
     isLoggedIn = !!session?.user;
-    userEmail = session?.user?.email || "";
+    userEmail = session?.user?.email || "";    
 
     if (isLoggedIn && session?.user) {
       const { data, error: profileError } = await supabase
@@ -41,10 +38,7 @@
 
   onMount(async () => {
     await checkSession();
-
-    supabase.auth.onAuthStateChange((event, session) => {
-      checkSession();
-    });
+    supabase.auth.onAuthStateChange((event, session) => {checkSession();});
   });
 
   async function handleLogout() {

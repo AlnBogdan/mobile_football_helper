@@ -187,14 +187,14 @@
                 ],
             });
 
-       const exercisesToExport = trainingData.selectedExercises; // Всегда только выбранные упражнения
+        const exercisesToExport = trainingData.selectedExercises;
 
         const exercisesToTable = (title: string, part: string) => {
             const filtered = exercisesToExport.filter((e) => e.part === part);
             if (filtered.length === 0) return [];
 
-            const rows = filtered.map(
-                (ex) =>
+            const rows = filtered.flatMap((ex) => {
+                const exerciseRows = [
                     new TableRow({
                         children: [
                             new TableCell({
@@ -211,7 +211,30 @@
                             }),
                         ],
                     }),
-            );
+                ];
+                
+                if (ex.scheme) {
+                    exerciseRows.push(
+                        new TableRow({
+                            children: [
+                                new TableCell({
+                                    children: [
+                                        new Paragraph({
+                                            text: "Схема упражнения:"
+                                        }),
+                                        new Paragraph({
+                                            text: ex.scheme,
+                                            style: "hyperlink",
+                                        }),
+                                    ],
+                                    columnSpan: 3,
+                                }),
+                            ],
+                        })
+                    );
+                }
+                return exerciseRows;
+            });
 
             return [
                 section(title),
@@ -277,10 +300,7 @@
                                     bullet: { level: 0 },
                                 }),
                         ),
-                        ...exercisesToTable(
-                            "Подготовительная часть",
-                            "preparatory",
-                        ),
+                        ...exercisesToTable("Подготовительная часть","preparatory",),
                         ...exercisesToTable("Основная часть", "main"),
                         ...exercisesToTable("Заключительная часть", "final"),
                     ],
@@ -293,7 +313,7 @@
             const blobUrl = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = blobUrl;
-            a.download = "plan.docx";
+            a.download = `План тренировки ${date}.docx`;
             a.click();
             URL.revokeObjectURL(blobUrl);
         });

@@ -21,12 +21,13 @@
 
     try {
       if (authMode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-
+        console.log("Пытаюсь войти..."); // <- Добавьте это
+        const { error } = await supabase.auth.signInWithPassword({email,password,});
+        if (error) throw error; 
+        
+        // Принудительная проверка сессии
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Текущая сессия:', session);
         //const redirectTo = $page.url.searchParams.get('redirectTo') || '/admin';
         //goto(redirectTo);
       } else if (authMode === "signup") {
